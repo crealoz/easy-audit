@@ -18,7 +18,7 @@ class AroundChecker
      * @throws \ReflectionException
      * @throws FileSystemException
      */
-    public function execute($filePath)
+    public function execute($class, $filePath)
     {
         $fileContent = file_get_contents($filePath);
         if ($fileContent === false) {
@@ -28,9 +28,18 @@ class AroundChecker
             $callable = function($functionName) {
                 return str_contains($functionName, 'around');
             };
-            $functions = $this->functionsParser->getFunctionsFromTokens(token_get_all($fileContent), $filePath, $callable);
-            foreach ($functions as $functionName => $functionContent) {
-                dd($functionName, $functionContent);
+            $aroundMethods = [];
+            foreach (get_class_methods($class) as $methodName) {
+                if ($callable($methodName)) {
+                    $aroundMethods[] = $methodName;
+                }
+            }
+            foreach ($aroundMethods as $aroundMethod) {
+                $content = $this->functionsParser->getFunctionContent($class, $filePath, $aroundMethod);
+                /**
+                 * If $proceed is the first instruction of the method, throw an exception
+                 */
+
             }
         }
     }

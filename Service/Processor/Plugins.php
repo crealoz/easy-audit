@@ -6,7 +6,6 @@ use Crealoz\EasyAudit\Exception\Processor\MagentoFrameworkPluginExtension;
 use Crealoz\EasyAudit\Exception\Processor\PluginFileDoesNotExistException;
 use Crealoz\EasyAudit\Exception\Processor\SameModulePluginException;
 use Crealoz\EasyAudit\Service\Processor\Plugins\AroundChecker;
-use Magento\Framework\Data\Collection\FilesystemFactory;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
@@ -88,7 +87,7 @@ class Plugins implements ProcessorInterface
          * Parse code for around plugins
          */
         try {
-            $this->aroundChecker->execute($pluggingClassPath);
+            $this->aroundChecker->execute($pluggingClass, $pluggingClassPath);
         } catch (FileSystemException|\ReflectionException $e) {
             $this->logger->error($e->getMessage());
         }
