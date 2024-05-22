@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Command -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="runAuditCommand" xsi:type="object">Crealoz\EasyAudit\Console\Command\RunAuditCommand</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- End of Command -->
+    <!-- Logger -->
+    <virtualType name="Crealoz\EasyAudit\Logger\Handler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/crealoz-audit.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Crealoz\EasyAudit\Logger\Logger" type="Monolog\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">audit</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Crealoz\EasyAudit\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <!-- End of Logger -->
+</config>
