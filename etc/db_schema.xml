@@ -4,7 +4,7 @@
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
         <column xsi:type="varchar" name="user" nullable="false" length="255" comment="User"/>
         <column xsi:type="timestamp" name="date" nullable="false" on_update="false" default="CURRENT_TIMESTAMP" comment="Date"/>
-        <column xsi:type="text" name="filepath" nullable="true" length="2M" comment="File Path"/>
+        <column xsi:type="varchar" name="filepath" nullable="true" length="255" comment="File Path"/>
         <column xsi:type="varchar" name="overall_result" nullable="true" length="255" comment="Overall Result"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>

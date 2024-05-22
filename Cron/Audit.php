@@ -3,6 +3,13 @@ namespace Crealoz\EasyAudit\Cron;
 
 class Audit
 {
+    public function __construct(
+        protected \Crealoz\EasyAudit\Service\Audit $auditService
+    )
+    {
+
+    }
+
     public function execute()
     {
         // Check for any pending audit requests and execute them

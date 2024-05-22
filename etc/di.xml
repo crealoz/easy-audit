@@ -4,7 +4,7 @@
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="runAuditCommand" xsi:type="object">Crealoz\EasyAudit\Console\Command\RunAuditCommand</item>
+                <item name="runAuditCommand" xsi:type="object">Crealoz\EasyAudit\Console\RunAuditCommand</item>
             </argument>
         </arguments>
     </type>
@@ -23,5 +23,10 @@
             </argument>
         </arguments>
     </virtualType>
+    <type name="Crealoz\EasyAudit\Service\Processor\Plugins">
+        <arguments>
+            <argument name="logger" xsi:type="object">Crealoz\EasyAudit\Logger\Logger</argument>
+        </arguments>
+    </type>
     <!-- End of Logger -->
 </config>

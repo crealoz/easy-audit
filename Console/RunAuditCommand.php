@@ -7,6 +7,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RunAuditCommand extends Command
 {
+    public function __construct(
+        protected \Crealoz\EasyAudit\Service\Audit $auditService
+    )
+    {
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this->setName('crealoz:run:audit')
@@ -15,8 +22,11 @@ class RunAuditCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // Call the audit service here
+        $output->writeln('Starting audit service...');
+
+        $this->auditService->run();
 
         $output->writeln('Audit service has been run successfully.');
+        return Command::SUCCESS;
     }
 }
