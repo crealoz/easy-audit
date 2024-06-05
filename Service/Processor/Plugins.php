@@ -2,16 +2,42 @@
 
 namespace Crealoz\EasyAudit\Service\Processor;
 
-use Crealoz\EasyAudit\Exception\Processor\MagentoFrameworkPluginExtension;
-use Crealoz\EasyAudit\Exception\Processor\PluginFileDoesNotExistException;
-use Crealoz\EasyAudit\Exception\Processor\SameModulePluginException;
+use Crealoz\EasyAudit\Exception\Processor\Plugins\MagentoFrameworkPluginExtension;
+use Crealoz\EasyAudit\Exception\Processor\Plugins\PluginFileDoesNotExistException;
+use Crealoz\EasyAudit\Exception\Processor\Plugins\SameModulePluginException;
 use Crealoz\EasyAudit\Service\Processor\Plugins\AroundChecker;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 
-class Plugins implements ProcessorInterface
+class Plugins extends AbstractProcessor implements ProcessorInterface
 {
+    protected string $processorName = 'plugins';
+
+    protected array $results = [
+        'hasErrors' => false,
+        'errors' => [
+            'sameModulePlugin' => [
+                'explanation' => 'Plugin class must not be in the same module as the plugged in class',
+                'files' => []
+            ],
+            'magentoFrameworkPlugin' => [
+                'explanation' => 'Plugin class must not be in the Magento Framework',
+                'files' => []
+            ],
+        ],
+        'warnings' => [
+            'nonExistentPluginFile' => [
+                'explanation' => 'Plugin file does not exist',
+                'files' => []
+            ],
+            'insufficientPermissions' => [
+                'explanation' => 'Insufficient permissions to read file',
+                'files' => []
+            ],
+        ],
+        'suggestions' => [],
+    ];
 
     public function __construct(
         protected AroundChecker $aroundChecker,
@@ -23,16 +49,60 @@ class Plugins implements ProcessorInterface
     }
 
     /**
-     * @param array $data
+     * @param $input
      * @return array
-     * @throws MagentoFrameworkPluginExtension
-     * @throws SameModulePluginException
-     * @throws PluginFileDoesNotExistException
      */
-    public function process(array $data)
+    public function run($input): array
     {
-        $pluggingClass = $data['pluggingClassName'];
-        $pluggedInClass = $data['pluggedInClass'];
+
+        //Check if the input is an XML object
+        if (!($input instanceof \SimpleXMLElement)) {
+            throw new \InvalidArgumentException("Input must be an instance of SimpleXMLElement");
+        }
+
+        // Get all 'type' nodes that contain a 'plugin' node
+        $typeNodes = $input->xpath('//type[plugin]');
+
+        try {
+            foreach ($typeNodes as $typeNode) {
+                // Get all 'plugin' nodes within the current 'type' node
+                $pluginNodes = $typeNode->xpath('plugin');
+
+                $pluggedClassName = (string)$typeNode['name'];
+
+                foreach ($pluginNodes as $pluginNode) {
+                    $pluggingClassName = (string)$pluginNode['type'];
+                    $pluginDisabled = (string)$pluginNode['disabled'] ?? 'false';
+                    if ($pluginDisabled === 'true') {
+                        continue;
+                    }
+                    try {
+                        $this->process($pluggingClassName, $pluggedClassName);
+                    } catch (MagentoFrameworkPluginExtension $e) {
+                        $this->results['errors']['magentoFrameworkPlugin']['files'][] = $e->getErroneousFile();
+                    } catch (PluginFileDoesNotExistException $e) {
+                        $this->results['warnings']['nonExistentPluginFile']['files'][] = $e->getErroneousFile();
+                    } catch (SameModulePluginException $e) {
+                        $this->results['errors']['sameModulePlugin']['files'][] = $e->getErroneousFile();
+                    }
+                }
+            }
+        } catch (FileSystemException $e) {
+            $this->results['warnings']['insufficientPermissions']['files'][] = $e->getMessage();
+        }
+        return $this->results;
+    }
+
+    /**
+     * @param $pluggingClass
+     * @param $pluggedInClass
+     * @throws MagentoFrameworkPluginExtension
+     * @throws PluginFileDoesNotExistException
+     * @throws SameModulePluginException
+     * @throws FileSystemException
+     */
+    protected function process($pluggingClass, $pluggedInClass): void
+    {
         $this->isSameModulePlugin($pluggingClass, $pluggedInClass);
         $this->isMagentoFrameworkClass($pluggedInClass);
         $this->checkPluginFile($pluggingClass);
@@ -41,7 +111,7 @@ class Plugins implements ProcessorInterface
     /**
      * @throws SameModulePluginException
      */
-    private function isSameModulePlugin(string $pluggingClass, string $pluggedInClass)
+    private function isSameModulePlugin(string $pluggingClass, string $pluggedInClass): array
     {
         $pluggingClassParts = explode('\\', $pluggingClass);
         $pluggedInClassParts = explode('\\', $pluggedInClass);
@@ -51,12 +121,13 @@ class Plugins implements ProcessorInterface
                 $pluggingClass
             );
         }
+        return ['vendor' => $pluggingClassParts[0], 'module' => $pluggingClassParts[1]];
     }
 
     /**
      * @throws MagentoFrameworkPluginExtension
      */
-    private function isMagentoFrameworkClass(string $pluggedInClass)
+    private function isMagentoFrameworkClass(string $pluggedInClass): void
     {
         if (str_starts_with($pluggedInClass, 'Magento\\Framework\\')) {
             throw new MagentoFrameworkPluginExtension(
@@ -68,10 +139,12 @@ class Plugins implements ProcessorInterface
 
     /**
      * @throws PluginFileDoesNotExistException
+     * @throws FileSystemException
      */
-    private function checkPluginFile(string $pluggingClass)
+    private function checkPluginFile(string $pluggingClass): void
     {
         $pluggingClassParts = explode('\\', $pluggingClass);
+
         /**
          * get file path in magento environment
          */

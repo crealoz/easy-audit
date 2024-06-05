@@ -29,4 +29,15 @@
         </arguments>
     </type>
     <!-- End of Logger -->
+    <!-- Processors -->
+    <type name="Crealoz\EasyAudit\Service\Audit">
+        <arguments>
+            <argument name="processors" xsi:type="array">
+                <item name="di" xsi:type="array">
+                    <item name="plugins" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Plugins</item>
+                    <item name="preferences" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Preferences</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
 </config>

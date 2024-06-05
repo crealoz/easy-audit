@@ -1,8 +1,8 @@
 {
-    "name": "crealoz/easyaudit",
+    "name": "crealoz/easy-audit",
     "description": "Description of your module",
     "require": {
-        "php": "~7.4.0||~8.0.2",
+        "php": "^8.1",
         "magento/framework": "*",
         "ext-simplexml": "*"
     },

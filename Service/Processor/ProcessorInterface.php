@@ -7,8 +7,17 @@ use Crealoz\EasyAudit\Exception\Processor\AuditProcessorException;
 interface ProcessorInterface
 {
     /**
-     * @param array $data
-     * @throws AuditProcessorException
+     * @param $input
      */
-    public function process(array $data);
+    public function run($input): array;
+
+    /**
+     * @return string
+     */
+    public function getProcessorName(): string;
+
+    /**
+     * @return array
+     */
+    public function getResults(): array;
 }
