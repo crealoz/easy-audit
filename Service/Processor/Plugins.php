@@ -2,6 +2,8 @@
 
 namespace Crealoz\EasyAudit\Service\Processor;
 
+use Crealoz\EasyAudit\Exception\Processor\Plugins\AroundToAfterPluginException;
+use Crealoz\EasyAudit\Exception\Processor\Plugins\AroundToBeforePluginException;
 use Crealoz\EasyAudit\Exception\Processor\Plugins\MagentoFrameworkPluginExtension;
 use Crealoz\EasyAudit\Exception\Processor\Plugins\PluginFileDoesNotExistException;
 use Crealoz\EasyAudit\Exception\Processor\Plugins\SameModulePluginException;
@@ -18,21 +20,35 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
         'hasErrors' => false,
         'errors' => [
             'sameModulePlugin' => [
+                'title' => 'Same Module Plugin',
                 'explanation' => 'Plugin class must not be in the same module as the plugged in class',
                 'files' => []
             ],
             'magentoFrameworkPlugin' => [
+                'title' => 'Magento Framework Plugin',
                 'explanation' => 'Plugin class must not be in the Magento Framework',
                 'files' => []
             ],
         ],
         'warnings' => [
             'nonExistentPluginFile' => [
+                'title' => 'Non-existent Plugin File',
                 'explanation' => 'Plugin file does not exist',
                 'files' => []
             ],
             'insufficientPermissions' => [
+                'title' => 'Insufficient Permissions',
                 'explanation' => 'Insufficient permissions to read file',
+                'files' => []
+            ],
+            'aroundToBeforePlugin' => [
+                'title' => 'Around to Before Plugin',
+                'explanation' => 'Around plugin should be a before plugin',
+                'files' => []
+            ],
+            'aroundToAfterPlugin' => [
+                'title' => 'Around to After Plugin',
+                'explanation' => 'Around plugin should be an after plugin',
                 'files' => []
             ],
         ],
@@ -76,15 +92,7 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
                     if ($pluginDisabled === 'true') {
                         continue;
                     }
-                    try {
-                        $this->process($pluggingClassName, $pluggedClassName);
-                    } catch (MagentoFrameworkPluginExtension $e) {
-                        $this->results['errors']['magentoFrameworkPlugin']['files'][] = $e->getErroneousFile();
-                    } catch (PluginFileDoesNotExistException $e) {
-                        $this->results['warnings']['nonExistentPluginFile']['files'][] = $e->getErroneousFile();
-                    } catch (SameModulePluginException $e) {
-                        $this->results['errors']['sameModulePlugin']['files'][] = $e->getErroneousFile();
-                    }
+                    $this->process($pluggingClassName, $pluggedClassName);
                 }
             }
         } catch (FileSystemException $e) {
@@ -96,22 +104,36 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
     /**
      * @param $pluggingClass
      * @param $pluggedInClass
-     * @throws MagentoFrameworkPluginExtension
-     * @throws PluginFileDoesNotExistException
-     * @throws SameModulePluginException
      * @throws FileSystemException
      */
     protected function process($pluggingClass, $pluggedInClass): void
     {
-        $this->isSameModulePlugin($pluggingClass, $pluggedInClass);
-        $this->isMagentoFrameworkClass($pluggedInClass);
-        $this->checkPluginFile($pluggingClass);
+        try {
+            $this->isSameModulePlugin($pluggingClass, $pluggedInClass);
+            $this->isMagentoFrameworkClass($pluggingClass, $pluggedInClass);
+            $this->checkPluginFile($pluggingClass);
+        } catch (MagentoFrameworkPluginExtension $e) {
+            $this->results['hasErrors'] = true;
+            $this->results['errors']['magentoFrameworkPlugin']['files'][] = $e->getErroneousFile();
+        } catch (PluginFileDoesNotExistException $e) {
+            $this->results['hasErrors'] = true;
+            $this->results['warnings']['nonExistentPluginFile']['files'][] = $e->getErroneousFile();
+        } catch (SameModulePluginException $e) {
+            $this->results['hasErrors'] = true;
+            $this->results['errors']['sameModulePlugin']['files'][] = $e->getErroneousFile();
+        } catch (AroundToBeforePluginException $e) {
+            $this->results['hasErrors'] = true;
+            $this->results['warnings']['aroundToBeforePlugin']['files'][] = $e->getErroneousFile();
+        } catch (AroundToAfterPluginException $e) {
+            $this->results['hasErrors'] = true;
+            $this->results['warnings']['aroundToAfterPlugin']['files'][] = $e->getErroneousFile();
+        }
     }
 
     /**
      * @throws SameModulePluginException
      */
-    private function isSameModulePlugin(string $pluggingClass, string $pluggedInClass): array
+    private function isSameModulePlugin(string $pluggingClass, string $pluggedInClass): void
     {
         $pluggingClassParts = explode('\\', $pluggingClass);
         $pluggedInClassParts = explode('\\', $pluggedInClass);
@@ -121,18 +143,17 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
                 $pluggingClass
             );
         }
-        return ['vendor' => $pluggingClassParts[0], 'module' => $pluggingClassParts[1]];
     }
 
     /**
      * @throws MagentoFrameworkPluginExtension
      */
-    private function isMagentoFrameworkClass(string $pluggedInClass): void
+    private function isMagentoFrameworkClass(string $pluggingClass, string $pluggedInClass): void
     {
         if (str_starts_with($pluggedInClass, 'Magento\\Framework\\')) {
             throw new MagentoFrameworkPluginExtension(
                 __('Plugin class must not be in the Magento Framework'),
-                $pluggedInClass
+                $pluggingClass . " is plugged on " . $pluggedInClass
             );
         }
     }
@@ -140,6 +161,8 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
     /**
      * @throws PluginFileDoesNotExistException
      * @throws FileSystemException
+     * @throws AroundToBeforePluginException
+     * @throws AroundToAfterPluginException
      */
     private function checkPluginFile(string $pluggingClass): void
     {

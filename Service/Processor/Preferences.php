@@ -12,11 +12,13 @@ class Preferences extends AbstractProcessor implements ProcessorInterface
         'hasErrors' => false,
         'errors' => [
             'multiplePreferences' => [
+                'title' => 'Multiple Preferences',
                 'explanation' => 'Multiple preferences found for the same file. This can lead to unexpected behavior.
                  Please remove the duplicate preferences or check that sequence is done correctly in module declaration.',
                 'files' => []
             ],
         ],
+        'warnings' => [],
     ];
 
     public function run($input): array

@@ -23,8 +23,12 @@ class AbstractProcessor
 
     public function getResults(): array
     {
-        if (!array_key_exists('hasErrors', $this->results)) {
-            throw new GeneralAuditException(__('Results are malformed. Missing "hasErrors" key.'));
+        if (
+            !array_key_exists('hasErrors', $this->results)
+            && !array_key_exists('errors', $this->results)
+            && !array_key_exists('warnings', $this->results)
+        ) {
+            throw new GeneralAuditException(__('Results are malformed for processor ' . $this->getProcessorName() . '. Please check the processor implementation.'));
         }
         return $this->results;
     }

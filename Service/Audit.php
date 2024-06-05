@@ -2,6 +2,10 @@
 
 namespace Crealoz\EasyAudit\Service;
 
+use Crealoz\EasyAudit\Service\FileSystem\DiXmlGetter;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Filesystem;
+use Magento\MediaStorage\Model\File\Storage\FileFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,9 +17,12 @@ class Audit
     protected array $results = [];
 
     public function __construct(
-        protected \Crealoz\EasyAudit\Service\FileSystem\DiXmlGetter $diXmlGetter,
-        protected LoggerInterface                                   $logger,
-        protected array $processors = []
+        protected DiXmlGetter          $diXmlGetter,
+        protected LoggerInterface      $logger,
+        protected readonly FileFactory $fileFactory,
+        protected readonly Filesystem $filesystem,
+        private readonly PDFWriter     $pdfWriter,
+        protected array                $processors = []
     )
     {
 
@@ -27,7 +34,7 @@ class Audit
         if (!empty($diProcessors)) {
             $this->processForDi($diProcessors, $output);
         }
-        dump($this->results);
+        $this->pdfWriter->createdPDF($this->results);
     }
 
     protected function processForDi($diProcessors, $output = null): void
