@@ -4,7 +4,7 @@ namespace Crealoz\EasyAudit\Service\FileSystem;
 
 class DiXmlGetter
 {
-    public function getDiXmlFiles()
+    public function getDiXmlFiles(): array
     {
         $directory = new \RecursiveDirectoryIterator('app/code/');
         $iterator = new \RecursiveIteratorIterator($directory);

@@ -34,8 +34,13 @@
         <arguments>
             <argument name="processors" xsi:type="array">
                 <item name="di" xsi:type="array">
-                    <item name="plugins" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Plugins</item>
-                    <item name="preferences" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Preferences</item>
+                    <item name="plugins" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Di\Plugins</item>
+                    <item name="preferences" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Di\Preferences</item>
+                </item>
+                <item name="view" xsi:type="array">
+                    <item name="layout" xsi:type="array">
+                        <item name="cacheable" xsi:type="object">Crealoz\EasyAudit\Service\Processor\View\Cacheable</item>
+                    </item>
                 </item>
             </argument>
         </arguments>

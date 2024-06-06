@@ -1,6 +1,9 @@
 <?php
 
-namespace Crealoz\EasyAudit\Service\Processor;
+namespace Crealoz\EasyAudit\Service\Processor\Di;
+
+use Crealoz\EasyAudit\Service\Processor\AbstractProcessor;
+use Crealoz\EasyAudit\Service\Processor\ProcessorInterface;
 
 class Preferences extends AbstractProcessor implements ProcessorInterface
 {

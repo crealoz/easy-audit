@@ -1,13 +1,15 @@
 <?php
 
-namespace Crealoz\EasyAudit\Service\Processor;
+namespace Crealoz\EasyAudit\Service\Processor\Di;
 
 use Crealoz\EasyAudit\Exception\Processor\Plugins\AroundToAfterPluginException;
 use Crealoz\EasyAudit\Exception\Processor\Plugins\AroundToBeforePluginException;
 use Crealoz\EasyAudit\Exception\Processor\Plugins\MagentoFrameworkPluginExtension;
 use Crealoz\EasyAudit\Exception\Processor\Plugins\PluginFileDoesNotExistException;
 use Crealoz\EasyAudit\Exception\Processor\Plugins\SameModulePluginException;
-use Crealoz\EasyAudit\Service\Processor\Plugins\AroundChecker;
+use Crealoz\EasyAudit\Service\Processor\AbstractProcessor;
+use Crealoz\EasyAudit\Service\Processor\Di\Plugins\AroundChecker;
+use Crealoz\EasyAudit\Service\Processor\ProcessorInterface;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;

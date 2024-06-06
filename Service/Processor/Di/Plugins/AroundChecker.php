@@ -1,6 +1,6 @@
 <?php
 
-namespace Crealoz\EasyAudit\Service\Processor\Plugins;
+namespace Crealoz\EasyAudit\Service\Processor\Di\Plugins;
 
 use Crealoz\EasyAudit\Exception\Processor\Plugins\AroundToAfterPluginException;
 use Crealoz\EasyAudit\Exception\Processor\Plugins\AroundToBeforePluginException;

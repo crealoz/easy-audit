@@ -28,13 +28,17 @@ class PDFWriter
             $this->writeTitle($section, $x);
             foreach ($result as $subsection => $subresult) {
                 if ($subresult['hasErrors']) {
-                    $this->writeLine('Errors', $x);
-                    foreach ($subresult['errors'] as $errorType => $errors) {
-                        $this->manageSubsection($errors);
+                    if (isset($subresult['errors'])){
+                        $this->writeLine('Errors', $x);
+                        foreach ($subresult['errors'] as $errorType => $errors) {
+                            $this->manageSubsection($errors);
+                        }
                     }
-                    $this->writeLine('Warnings', $x);
-                    foreach ($subresult['warnings'] as $warningType => $warnings) {
-                        $this->manageSubsection($warnings);
+                    if (isset($subresult['warnings'])) {
+                        $this->writeLine('Warnings', $x);
+                        foreach ($subresult['warnings'] as $warningType => $warnings) {
+                            $this->manageSubsection($warnings);
+                        }
                     }
                 }
             }
