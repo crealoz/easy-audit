@@ -42,7 +42,37 @@
                         <item name="cacheable" xsi:type="object">Crealoz\EasyAudit\Service\Processor\View\Cacheable</item>
                     </item>
                 </item>
+                <item name="code" xsi:type="array">
+                    <item name="helpers" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Code\Helpers</item>
+                </item>
             </argument>
         </arguments>
     </type>
+    <!-- End of Processors -->
+    <!-- Files getters -->
+    <virtualType name="Crealoz\EasyAudit\Service\FileSystem\DiXmlGetter" type="Crealoz\EasyAudit\Service\FileSystem\FileGetter">
+        <arguments>
+            <argument name="path" xsi:type="string">app/code/</argument>
+            <argument name="pattern" xsi:type="string">/^.+di\.xml$/i</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Crealoz\EasyAudit\Service\FileSystem\LayoutXmlGetter" type="Crealoz\EasyAudit\Service\FileSystem\FileGetter">
+        <arguments>
+            <argument name="path" xsi:type="string">app/</argument>
+            <argument name="pattern" xsi:type="string">/^.+\/view\/frontend\/layout\/.*\.xml$/i</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Crealoz\EasyAudit\Service\FileSystem\PhtmlGetter" type="Crealoz\EasyAudit\Service\FileSystem\FileGetter">
+        <arguments>
+            <argument name="path" xsi:type="string">app/</argument>
+            <argument name="pattern" xsi:type="string">/^.+\/templates\/.*\.phtml$/i</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Crealoz\EasyAudit\Service\FileSystem\HelpersGetter" type="Crealoz\EasyAudit\Service\FileSystem\FileGetter">
+        <arguments>
+            <argument name="path" xsi:type="string">app/code/</argument>
+            <argument name="pattern" xsi:type="string">/^.+\/Helper\/.*\.php$/i</argument>
+        </arguments>
+    </virtualType>
+
 </config>

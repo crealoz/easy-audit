@@ -2,8 +2,7 @@
 
 namespace Crealoz\EasyAudit\Service;
 
-use Crealoz\EasyAudit\Service\FileSystem\DiXmlGetter;
-use Crealoz\EasyAudit\Service\FileSystem\LayoutXmlGetter;
+use Crealoz\EasyAudit\Service\FileSystem\FileGetterFactory;
 use Magento\Framework\Filesystem;
 use Magento\MediaStorage\Model\File\Storage\FileFactory;
 use Psr\Log\LoggerInterface;
@@ -17,19 +16,18 @@ class Audit
     protected array $results = [];
 
     public function __construct(
-        protected DiXmlGetter            $diXmlGetter,
-        protected LoggerInterface        $logger,
-        protected readonly FileFactory   $fileFactory,
-        protected readonly Filesystem    $filesystem,
-        private readonly LayoutXmlGetter $layoutXmlGetter,
-        private readonly PDFWriter       $pdfWriter,
-        protected array                  $processors = []
+        protected LoggerInterface              $logger,
+        protected readonly FileFactory         $fileFactory,
+        protected readonly Filesystem          $filesystem,
+        protected readonly FileGetterFactory $fileGetterFactory,
+        protected readonly PDFWriter           $pdfWriter,
+        protected array                        $processors = []
     )
     {
 
     }
 
-    public function run(InputInterface $input = null, OutputInterface $output = null)
+    public function run(InputInterface $input = null, OutputInterface $output = null): void
     {
         $diProcessors = $this->processors['di'] ?? [];
         if (!empty($diProcessors)) {
@@ -41,30 +39,47 @@ class Audit
                 $this->processForLayout($viewProcessors['layout'], $output);
             }
         }
+        $codeProcessors = $this->processors['code'] ?? [];
+        if (!empty($codeProcessors)) {
+            $this->processForCode($codeProcessors, $output);
+        }
         $this->pdfWriter->createdPDF($this->results);
     }
 
     protected function processForDi(array $diProcessors, OutputInterface $output = null): void
     {
-        $this->results['di'] = [];
-        $diXmlFiles = $this->diXmlGetter->getDiXmlFiles();
+        $diXmlGetter = $this->fileGetterFactory->create('di');
+        $diXmlFiles = $diXmlGetter->execute();
 
         if (!empty($diXmlFiles)) {
-            $this->processXml($diProcessors, $diXmlFiles, $output);
+            $this->results['di'] = [];
+            $this->processXml('di', $diProcessors, $diXmlFiles, $output);
         }
     }
 
     protected function processForLayout(array $viewProcessors, OutputInterface $output = null): void
     {
-        $this->results['view'] = [];
-        $layoutXmlFiles = $this->layoutXmlGetter->execute();
+        $layoutXmlGetter = $this->fileGetterFactory->create('layout');
+        $layoutXmlFiles = $layoutXmlGetter->execute();
 
         if (!empty($layoutXmlFiles)) {
-            $this->processXml($viewProcessors, $layoutXmlFiles, $output);
+            $this->results['view'] = [];
+            $this->processXml('view', $viewProcessors, $layoutXmlFiles, $output);
         }
     }
 
-    protected function processXml(array $viewProcessors, array $xmlFiles, OutputInterface $output =null): void
+    protected function processForCode(array $codeProcessors, OutputInterface $output = null): void
+    {
+        $helpersGetter = $this->fileGetterFactory->create('helpers');
+        $codeFiles = $helpersGetter->execute();
+
+        if (!empty($codeFiles)) {
+            $this->results['code'] = [];
+            $this->processCode($codeProcessors, $codeFiles, $output);
+        }
+    }
+
+    protected function processXml($processorType, array $viewProcessors, array $xmlFiles, OutputInterface $output = null): void
     {
         if ($output) {
             /** if we are in command line, we display a bar */
@@ -86,7 +101,31 @@ class Audit
             }
         }
         foreach ($viewProcessors as $processor) {
-            $this->results['view'][$processor->getProcessorName()] = $processor->getResults();
+            $this->results[$processorType][$processor->getProcessorName()] = $processor->getResults();
+        }
+        if ($output) {
+            $progressBar->finish();
+        }
+    }
+
+    protected function processCode(array $codeProcessors, array $codeFiles, OutputInterface $output = null): void
+    {
+        if ($output) {
+            /** if we are in command line, we display a bar */
+            $progressBar = new ProgressBar($output, count($codeFiles));
+            $progressBar->start();
+        }
+        foreach ($codeFiles as $codeFile) {
+            if ($output) {
+                $progressBar->advance();
+            }
+            /** @var \Crealoz\EasyAudit\Service\Processor\ProcessorInterface $processor */
+            foreach ($codeProcessors as $processor) {
+                $processor->run($codeFile);
+            }
+        }
+        foreach ($codeProcessors as $processor) {
+            $this->results['code'][$processor->getProcessorName()] = $processor->getResults();
         }
         if ($output) {
             $progressBar->finish();

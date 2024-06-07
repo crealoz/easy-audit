@@ -5,6 +5,9 @@ namespace Crealoz\EasyAudit\Exception\Processor;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Phrase;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class AuditProcessorException extends LocalizedException
 {
     private string $erroneousFile;

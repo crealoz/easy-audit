@@ -7,10 +7,14 @@ use Crealoz\EasyAudit\Exception\Processor\Plugins\AroundToBeforePluginException;
 use Crealoz\EasyAudit\Service\Parser\Functions;
 use Magento\Framework\Exception\FileSystemException;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class AroundChecker
 {
     public function __construct(
         protected readonly Functions $functionsParser,
+        protected readonly \Magento\Framework\Filesystem\DriverInterface $driver
     )
     {
 
@@ -22,12 +26,10 @@ class AroundChecker
      * @throws AroundToBeforePluginException
      * @throws AroundToAfterPluginException
      */
-    public function execute($class, $filePath): void
+    public function execute($class): void
     {
-        $fileContent = file_get_contents($filePath);
-        if ($fileContent === false) {
-            throw new FileSystemException(__('Could not read file content'));
-        }
+        $filePath = (new \ReflectionClass($class))->getFileName();
+        $fileContent = $this->driver->fileGetContents($filePath);
         if (str_contains($fileContent, 'around')) {
             $callable = function($functionName) {
                 return str_contains($functionName, 'around');

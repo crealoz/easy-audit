@@ -5,6 +5,9 @@ namespace Crealoz\EasyAudit\Service\Processor\Di;
 use Crealoz\EasyAudit\Service\Processor\AbstractProcessor;
 use Crealoz\EasyAudit\Service\Processor\ProcessorInterface;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class Preferences extends AbstractProcessor implements ProcessorInterface
 {
     protected string $processorName = 'Preferences';
