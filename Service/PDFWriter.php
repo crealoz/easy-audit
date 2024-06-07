@@ -3,43 +3,40 @@
 namespace Crealoz\EasyAudit\Service;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Exception\FileSystemException;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class PDFWriter
 {
     private $pdf;
     
     private $currentPage;
     
-    private $y;
+    private int $y;
 
     public function __construct(
-        private readonly \Magento\Framework\Filesystem $filesystem
+        private readonly \Magento\Framework\Filesystem $filesystem,
+        private int $x = 30
     )
     {
 
     }
 
-    public function createdPDF($results)
+    /**
+     * @throws \Zend_Pdf_Exception
+     * @throws FileSystemException
+     */
+    public function createdPDF($results): void
     {
         $this->pdf = new \Zend_Pdf();
         $this->addPage();
-        $x = 30;
         foreach ($results as $section => $result) {
-            $this->writeTitle($section, $x);
+            $this->writeTitle($section);
             foreach ($result as $subsection => $subresult) {
                 if ($subresult['hasErrors']) {
-                    if (isset($subresult['errors'])){
-                        $this->writeLine('Errors', $x);
-                        foreach ($subresult['errors'] as $errorType => $errors) {
-                            $this->manageSubsection($errors);
-                        }
-                    }
-                    if (isset($subresult['warnings'])) {
-                        $this->writeLine('Warnings', $x);
-                        foreach ($subresult['warnings'] as $warningType => $warnings) {
-                            $this->manageSubsection($warnings);
-                        }
-                    }
+                    $this->manageSubResult($subresult);
                 }
             }
         }
@@ -51,21 +48,38 @@ class PDFWriter
         $this->pdf->save($fileName);
     }
 
-    private function manageSubsection($subresults) {
+    private function manageSubResult($subresult): void
+    {
+        if (isset($subresult['errors'])){
+            $this->writeLine('Errors');
+            foreach ($subresult['errors'] as $errorType => $errors) {
+                $this->manageSubsection($errors);
+            }
+        }
+        if (isset($subresult['warnings'])) {
+            $this->writeLine('Warnings');
+            foreach ($subresult['warnings'] as $warningType => $warnings) {
+                $this->manageSubsection($warnings);
+            }
+        }
+    }
+
+    private function manageSubsection($subresults): void
+    {
         if ($subresults['files'] === []) {
             return;
         }
         $this->writeSubSectionIntro($subresults);
-        $this->writeLine('Files:', 30);
+        $this->writeLine('Files:');
         foreach ($subresults['files'] as $file) {
             if (is_array($file)) {
                 $file = implode(', ', $file);
             }
-            $this->writeLine($file, 30);
+            $this->writeLine($file);
         }
     }
 
-    private function writeLine($text, $x)
+    private function writeLine($text): void
     {
         $this->setGeneralStyle();
         // If line is too long, we split it
@@ -73,22 +87,22 @@ class PDFWriter
             $wrappedText = wordwrap($text, 100, "--SPLIT--");
             $lines = explode("--SPLIT--", $wrappedText);
             foreach ($lines as $line) {
-                $this->writeLine($line, $x);
+                $this->writeLine($line);
             }
             return;
         }
 
-        $this->currentPage->drawText($text, $x, $this->y);
+        $this->currentPage->drawText($text, $this->x, $this->y);
         $this->y -= 20;
         if ($this->y < 50) {
             $this->addPage();
         }
     }
 
-    private function writeTitle($text, $x)
+    private function writeTitle($text): void
     {
         $this->setTitleStyle();
-        $this->currentPage->drawText($text, $x, $this->y);
+        $this->currentPage->drawText($text, $this->x, $this->y);
         $this->y -= 40;
         if ($this->y < 50) {
             $this->addPage();
@@ -96,7 +110,7 @@ class PDFWriter
         $this->setGeneralStyle();
     }
 
-    private function writeSubSectionIntro($subsection)
+    private function writeSubSectionIntro($subsection): void
     {
         if (isset($subsection['title'])) {
             $this->setSubTitleStyle();

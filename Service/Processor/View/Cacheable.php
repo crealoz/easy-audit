@@ -5,6 +5,9 @@ namespace Crealoz\EasyAudit\Service\Processor\View;
 use Crealoz\EasyAudit\Service\Processor\AbstractProcessor;
 use Crealoz\EasyAudit\Service\Processor\ProcessorInterface;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class Cacheable extends AbstractProcessor implements ProcessorInterface
 {
     protected string $processorName = 'Cacheable';

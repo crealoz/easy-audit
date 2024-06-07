@@ -7,6 +7,9 @@ use Crealoz\EasyAudit\Exception\Processor\Plugins\AroundToBeforePluginException;
 use Crealoz\EasyAudit\Service\Parser\Functions;
 use Magento\Framework\Exception\FileSystemException;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class AroundChecker
 {
     public function __construct(

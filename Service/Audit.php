@@ -3,6 +3,7 @@
 namespace Crealoz\EasyAudit\Service;
 
 use Crealoz\EasyAudit\Service\FileSystem\DiXmlGetter;
+use Crealoz\EasyAudit\Service\FileSystem\HelpersGetter;
 use Crealoz\EasyAudit\Service\FileSystem\LayoutXmlGetter;
 use Magento\Framework\Filesystem;
 use Magento\MediaStorage\Model\File\Storage\FileFactory;
@@ -17,19 +18,20 @@ class Audit
     protected array $results = [];
 
     public function __construct(
-        protected DiXmlGetter            $diXmlGetter,
         protected LoggerInterface        $logger,
         protected readonly FileFactory   $fileFactory,
         protected readonly Filesystem    $filesystem,
-        private readonly LayoutXmlGetter $layoutXmlGetter,
-        private readonly PDFWriter       $pdfWriter,
+        protected readonly DiXmlGetter     $diXmlGetter,
+        protected readonly LayoutXmlGetter $layoutXmlGetter,
+        protected readonly HelpersGetter   $helpersGetter,
+        protected readonly PDFWriter       $pdfWriter,
         protected array                  $processors = []
     )
     {
 
     }
 
-    public function run(InputInterface $input = null, OutputInterface $output = null)
+    public function run(InputInterface $input = null, OutputInterface $output = null): void
     {
         $diProcessors = $this->processors['di'] ?? [];
         if (!empty($diProcessors)) {
@@ -41,13 +43,17 @@ class Audit
                 $this->processForLayout($viewProcessors['layout'], $output);
             }
         }
+        $codeProcessors = $this->processors['code'] ?? [];
+        if (!empty($codeProcessors)) {
+            $this->processForCode($codeProcessors, $output);
+        }
         $this->pdfWriter->createdPDF($this->results);
     }
 
     protected function processForDi(array $diProcessors, OutputInterface $output = null): void
     {
         $this->results['di'] = [];
-        $diXmlFiles = $this->diXmlGetter->getDiXmlFiles();
+        $diXmlFiles = $this->diXmlGetter->execute();
 
         if (!empty($diXmlFiles)) {
             $this->processXml($diProcessors, $diXmlFiles, $output);
@@ -61,6 +67,16 @@ class Audit
 
         if (!empty($layoutXmlFiles)) {
             $this->processXml($viewProcessors, $layoutXmlFiles, $output);
+        }
+    }
+
+    protected function processForCode(array $codeProcessors, OutputInterface $output = null): void
+    {
+        $this->results['code'] = [];
+        $codeFiles = $this->helpersGetter->execute();
+
+        if (!empty($codeFiles)) {
+            $this->processCode($codeProcessors, $codeFiles, $output);
         }
     }
 

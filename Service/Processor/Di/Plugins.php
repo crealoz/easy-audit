@@ -14,6 +14,9 @@ use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class Plugins extends AbstractProcessor implements ProcessorInterface
 {
     protected string $processorName = 'plugins';
