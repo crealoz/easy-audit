@@ -55,7 +55,8 @@ class Helpers extends AbstractProcessor implements ProcessorInterface
 
     public function __construct(
         private readonly FileGetterFactory $fileGetterFactory,
-        protected readonly \Magento\Framework\Filesystem\DriverInterface $driver
+        protected readonly \Magento\Framework\Filesystem\DriverInterface $driver,
+        protected readonly \Magento\Framework\Filesystem\Io\File $io
     )
     {
     }
@@ -149,10 +150,10 @@ class Helpers extends AbstractProcessor implements ProcessorInterface
         $relativePath = str_replace('app/code/', '', $filePath);
 
         // Get the file name without extension
-        $fileName = basename($relativePath, '.php');
+        $fileName = $this->io->getPathInfo($relativePath)['filename'];
 
         // Get the directory name
-        $dirName = dirname($relativePath);
+        $dirName = $this->driver->getParentDirectory($relativePath);
 
         // Replace directory separators with namespace separators
         return str_replace('/', '\\', $dirName) . '\\' . $fileName;
