@@ -44,49 +44,34 @@ class Audit
         $this->pdfWriter->createdPDF($this->results);
     }
 
-    protected function processForDi($diProcessors, $output = null): void
+    protected function processForDi(array $diProcessors, OutputInterface $output = null): void
     {
         $this->results['di'] = [];
         $diXmlFiles = $this->diXmlGetter->getDiXmlFiles();
-        if ($output) {
-            /** if we are in command line, we display a bar */
-            $progressBar = new ProgressBar($output, count($diXmlFiles));
-            $progressBar->start();
-        }
-        foreach ($diXmlFiles as $diXmlFile) {
-            $xml = simplexml_load_file($diXmlFile);
-            if ($output) {
-                $progressBar->advance();
-            }
-            if ($xml === false) {
-                $this->logger->error("Failed to load XML file: $diXmlFile");
-                continue;
-            }
-            /** @var \Crealoz\EasyAudit\Service\Processor\ProcessorInterface $processor */
-            foreach ($diProcessors as $processor) {
-                $processor->run($xml);
-            }
-        }
-        /** @var \Crealoz\EasyAudit\Service\Processor\ProcessorInterface $processor */
-        foreach ($diProcessors as $processor) {
-            $this->results['di'][$processor->getProcessorName()] = $processor->getResults();
-        }
-        if ($output) {
-            $progressBar->finish();
+
+        if (!empty($diXmlFiles)) {
+            $this->processXml($diProcessors, $diXmlFiles, $output);
         }
     }
 
-    protected function processForLayout($viewProcessors, $output = null): void
+    protected function processForLayout(array $viewProcessors, OutputInterface $output = null): void
     {
         $this->results['view'] = [];
         $layoutXmlFiles = $this->layoutXmlGetter->execute();
 
+        if (!empty($layoutXmlFiles)) {
+            $this->processXml($viewProcessors, $layoutXmlFiles, $output);
+        }
+    }
+
+    protected function processXml(array $viewProcessors, array $xmlFiles, OutputInterface $output =null): void
+    {
         if ($output) {
             /** if we are in command line, we display a bar */
-            $progressBar = new ProgressBar($output, count($layoutXmlFiles));
+            $progressBar = new ProgressBar($output, count($xmlFiles));
             $progressBar->start();
         }
-        foreach ($layoutXmlFiles as $layoutXmlFile) {
+        foreach ($xmlFiles as $layoutXmlFile) {
             $xml = simplexml_load_file($layoutXmlFile);
             if ($output) {
                 $progressBar->advance();
@@ -102,6 +87,9 @@ class Audit
         }
         foreach ($viewProcessors as $processor) {
             $this->results['view'][$processor->getProcessorName()] = $processor->getResults();
+        }
+        if ($output) {
+            $progressBar->finish();
         }
     }
 }
