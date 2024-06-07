@@ -21,6 +21,7 @@ class FileGetterFactory
             'di' => $this->objectManager->get('\Crealoz\EasyAudit\Service\FileSystem\DiXmlGetter'),
             'layout' => $this->objectManager->get('\Crealoz\EasyAudit\Service\FileSystem\LayoutXmlGetter'),
             'helpers' => $this->objectManager->get('\Crealoz\EasyAudit\Service\FileSystem\HelpersGetter'),
+            'phtml' => $this->objectManager->get('\Crealoz\EasyAudit\Service\FileSystem\PhtmlGetter'),
             default => throw new \InvalidArgumentException("Unknown file getter type: $type")
         };
     }

@@ -48,38 +48,38 @@ class Audit
 
     protected function processForDi(array $diProcessors, OutputInterface $output = null): void
     {
-        $this->results['di'] = [];
         $diXmlGetter = $this->fileGetterFactory->create('di');
         $diXmlFiles = $diXmlGetter->execute();
 
         if (!empty($diXmlFiles)) {
-            $this->processXml($diProcessors, $diXmlFiles, $output);
+            $this->results['di'] = [];
+            $this->processXml('di', $diProcessors, $diXmlFiles, $output);
         }
     }
 
     protected function processForLayout(array $viewProcessors, OutputInterface $output = null): void
     {
-        $this->results['view'] = [];
         $layoutXmlGetter = $this->fileGetterFactory->create('layout');
         $layoutXmlFiles = $layoutXmlGetter->execute();
 
         if (!empty($layoutXmlFiles)) {
-            $this->processXml($viewProcessors, $layoutXmlFiles, $output);
+            $this->results['view'] = [];
+            $this->processXml('view', $viewProcessors, $layoutXmlFiles, $output);
         }
     }
 
     protected function processForCode(array $codeProcessors, OutputInterface $output = null): void
     {
-        $this->results['code'] = [];
         $helpersGetter = $this->fileGetterFactory->create('helpers');
         $codeFiles = $helpersGetter->execute();
 
         if (!empty($codeFiles)) {
+            $this->results['code'] = [];
             $this->processCode($codeProcessors, $codeFiles, $output);
         }
     }
 
-    protected function processXml(array $viewProcessors, array $xmlFiles, OutputInterface $output = null): void
+    protected function processXml($processorType, array $viewProcessors, array $xmlFiles, OutputInterface $output = null): void
     {
         if ($output) {
             /** if we are in command line, we display a bar */
@@ -101,7 +101,31 @@ class Audit
             }
         }
         foreach ($viewProcessors as $processor) {
-            $this->results['view'][$processor->getProcessorName()] = $processor->getResults();
+            $this->results[$processorType][$processor->getProcessorName()] = $processor->getResults();
+        }
+        if ($output) {
+            $progressBar->finish();
+        }
+    }
+
+    protected function processCode(array $codeProcessors, array $codeFiles, OutputInterface $output = null): void
+    {
+        if ($output) {
+            /** if we are in command line, we display a bar */
+            $progressBar = new ProgressBar($output, count($codeFiles));
+            $progressBar->start();
+        }
+        foreach ($codeFiles as $codeFile) {
+            if ($output) {
+                $progressBar->advance();
+            }
+            /** @var \Crealoz\EasyAudit\Service\Processor\ProcessorInterface $processor */
+            foreach ($codeProcessors as $processor) {
+                $processor->run($codeFile);
+            }
+        }
+        foreach ($codeProcessors as $processor) {
+            $this->results['code'][$processor->getProcessorName()] = $processor->getResults();
         }
         if ($output) {
             $progressBar->finish();

@@ -32,9 +32,6 @@
     <!-- Processors -->
     <type name="Crealoz\EasyAudit\Service\Audit">
         <arguments>
-            <argument name="diXmlGetter" xsi:type="object">Crealoz\EasyAudit\Service\FileSystem\DiXmlGetter</argument>
-            <argument name="layoutXmlGetter" xsi:type="object">Crealoz\EasyAudit\Service\FileSystem\LayoutXmlGetter</argument>
-            <argument name="helpersGetter" xsi:type="object">Crealoz\EasyAudit\Service\FileSystem\HelpersGetter</argument>
             <argument name="processors" xsi:type="array">
                 <item name="di" xsi:type="array">
                     <item name="plugins" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Di\Plugins</item>
@@ -44,6 +41,9 @@
                     <item name="layout" xsi:type="array">
                         <item name="cacheable" xsi:type="object">Crealoz\EasyAudit\Service\Processor\View\Cacheable</item>
                     </item>
+                </item>
+                <item name="code" xsi:type="array">
+                    <item name="helpers" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Code\Helpers</item>
                 </item>
             </argument>
         </arguments>
@@ -59,7 +59,13 @@
     <virtualType name="Crealoz\EasyAudit\Service\FileSystem\LayoutXmlGetter" type="Crealoz\EasyAudit\Service\FileSystem\FileGetter">
         <arguments>
             <argument name="path" xsi:type="string">app/</argument>
-            <argument name="pattern" xsi:type="string">/^.+layout\.xml$/i</argument>
+            <argument name="pattern" xsi:type="string">/^.+\/view\/frontend\/layout\/.*\.xml$/i</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Crealoz\EasyAudit\Service\FileSystem\PhtmlGetter" type="Crealoz\EasyAudit\Service\FileSystem\FileGetter">
+        <arguments>
+            <argument name="path" xsi:type="string">app/</argument>
+            <argument name="pattern" xsi:type="string">/^.+\/templates\/.*\.phtml$/i</argument>
         </arguments>
     </virtualType>
     <virtualType name="Crealoz\EasyAudit\Service\FileSystem\HelpersGetter" type="Crealoz\EasyAudit\Service\FileSystem\FileGetter">

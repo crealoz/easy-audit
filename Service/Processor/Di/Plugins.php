@@ -63,7 +63,6 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
 
     public function __construct(
         protected AroundChecker $aroundChecker,
-        private readonly DirectoryList $directoryList,
         private readonly LoggerInterface $logger,
         private readonly Files $filesUtility
     )
@@ -121,7 +120,10 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
             $this->checkPluginFile($pluggingClass);
         } catch (MagentoFrameworkPluginExtension $e) {
             $this->results['hasErrors'] = true;
-            $this->results['errors']['magentoFrameworkPlugin']['files'][] = $e->getErroneousFile();
+            if (!isset($this->results['errors']['magentoFrameworkPlugin']['files'][$e->getPluggedFile()])) {
+                $this->results['errors']['magentoFrameworkPlugin']['files'][$e->getPluggedFile()] = [];
+            }
+            $this->results['errors']['magentoFrameworkPlugin']['files'][$e->getPluggedFile()][] = $e->getErroneousFile();
         } catch (PluginFileDoesNotExistException $e) {
             $this->results['hasErrors'] = true;
             $this->results['warnings']['nonExistentPluginFile']['files'][] = $e->getErroneousFile();
@@ -160,14 +162,13 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
         if (str_starts_with($pluggedInClass, 'Magento\\Framework\\')) {
             throw new MagentoFrameworkPluginExtension(
                 __('Plugin class must not be in the Magento Framework'),
-                $pluggingClass . " is plugged on " . $pluggedInClass
+                $pluggingClass, $pluggedInClass
             );
         }
     }
 
     /**
      * @throws PluginFileDoesNotExistException
-     * @throws FileSystemException
      * @throws AroundToBeforePluginException
      * @throws AroundToAfterPluginException
      */

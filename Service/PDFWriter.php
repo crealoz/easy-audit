@@ -18,7 +18,7 @@ class PDFWriter
 
     public function __construct(
         private readonly \Magento\Framework\Filesystem $filesystem,
-        private int $x = 30
+        private int $x = 50
     )
     {
 
@@ -33,8 +33,9 @@ class PDFWriter
         $this->pdf = new \Zend_Pdf();
         $this->addPage();
         foreach ($results as $section => $result) {
-            $this->writeTitle($section);
+            $this->writeTitle($section, 40);
             foreach ($result as $subsection => $subresult) {
+                $this->writeSectionTitle($subsection);
                 if ($subresult['hasErrors']) {
                     $this->manageSubResult($subresult);
                 }
@@ -51,16 +52,46 @@ class PDFWriter
     private function manageSubResult($subresult): void
     {
         if (isset($subresult['errors'])){
-            $this->writeLine('Errors');
+            $this->setErrorStyle(14);
+            $this->currentPage->drawText('Errors', 44, $this->y);
             foreach ($subresult['errors'] as $errorType => $errors) {
-                $this->manageSubsection($errors);
+                if ($errorType === 'helpersInsteadOfViewModels') {
+                    $this->manageHelperInsteadOfViewModel($errors);
+                } else {
+                    $this->manageSubsection($errors);
+                }
             }
         }
-        if (isset($subresult['warnings'])) {
-            $this->writeLine('Warnings');
+        if (!empty($subresult['warnings'])) {
+            $this->y -= 15;
+            $this->setWarningStyle(14);
+            $this->currentPage->drawText('Warning', 44, $this->y);
             foreach ($subresult['warnings'] as $warningType => $warnings) {
                 $this->manageSubsection($warnings);
             }
+        }
+    }
+
+    private function manageHelperInsteadOfViewModel($subresults): void
+    {
+        if ($subresults['files'] === []) {
+            return;
+        }
+        $this->writeSubSectionIntro($subresults);
+        $this->writeLine('Files:');
+        foreach ($subresults['files'] as $file => $usages) {
+            $this->writeLine('-' . $file . '(usages : ' . $usages['usageCount'] . ')');
+            $this->x += 5;
+            unset($usages['usageCount']);
+            foreach ($usages as $template => $usage) {
+                $this->setGeneralStyle(8);
+                $this->currentPage->drawText('-' . $template . '(' . $usage . ')', $this->x, $this->y);
+                $this->y -= 15;
+                if ($this->y < 50) {
+                    $this->addPage();
+                }
+            }
+            $this->x -= 5;
         }
     }
 
@@ -75,7 +106,7 @@ class PDFWriter
             if (is_array($file)) {
                 $file = implode(', ', $file);
             }
-            $this->writeLine($file);
+            $this->writeLine('-' . $file);
         }
     }
 
@@ -93,34 +124,49 @@ class PDFWriter
         }
 
         $this->currentPage->drawText($text, $this->x, $this->y);
-        $this->y -= 20;
+        $this->y -= 15;
         if ($this->y < 50) {
             $this->addPage();
         }
     }
 
-    private function writeTitle($text): void
+    private function writeTitle($text, $x = null): void
     {
-        $this->setTitleStyle();
-        $this->currentPage->drawText($text, $this->x, $this->y);
-        $this->y -= 40;
-        if ($this->y < 50) {
+        $this->y -= 10;
+        if ($this->y < 130) {
             $this->addPage();
         }
+        $x = $x ?? $this->x;
+        $this->setTitleStyle();
+        $this->y -= 15;
+        $this->currentPage->drawText(strtoupper($text), $x, $this->y);
+        $this->y -= 30;
         $this->setGeneralStyle();
     }
 
     private function writeSubSectionIntro($subsection): void
     {
         if (isset($subsection['title'])) {
+            $this->y -= 20;
             $this->setSubTitleStyle();
-            $this->currentPage->drawText($subsection['title'], 30, $this->y);
+            $this->currentPage->drawText($subsection['title'], 48, $this->y);
         }
         if (isset($subsection['explanation'])) {
-            $this->y -= 20;
-            $this->writeLine($subsection['explanation'], 30);
+            $this->y -= 10;
+            $this->writeLine($subsection['explanation']);
         }
+    }
 
+    private function writeSectionTitle($text): void
+    {
+        $this->setTitleStyle(15);
+        $this->y -= 15;
+        $this->currentPage->drawText(strtoupper($text), 43, $this->y);
+        $this->y -= 20;
+        if ($this->y < 50) {
+            $this->addPage();
+        }
+        $this->setGeneralStyle();
     }
 
     private function addPage()
@@ -128,38 +174,60 @@ class PDFWriter
         $this->currentPage = $this->pdf->newPage(\Zend_Pdf_Page::SIZE_A4);
         $this->pdf->pages[] = $this->currentPage;
         $this->setGeneralStyle();
-        $this->y = 850 - 100;
+        $this->y = 850 - 50;
     }
 
-    private function setGeneralStyle()
+    private function setGeneralStyle($size = 9)
     {
         $style = new \Zend_Pdf_Style();
         $style->setLineColor(new \Zend_Pdf_Color_Rgb(0,0,0));
         $style->setFillColor(new \Zend_Pdf_Color_Rgb(0,0,0));
         $font = \Zend_Pdf_Font::fontWithName(\Zend_Pdf_Font::FONT_TIMES);
-        $style->setFont($font,12);
+        $style->setFont($font,$size);
         $this->currentPage->setStyle($style);
     }
 
-    private function setTitleStyle()
+    private function setTitleStyle($size = 20)
     {
         $style = new \Zend_Pdf_Style();
         // Blue color
         $style->setLineColor(new \Zend_Pdf_Color_Rgb(0,0,0.85));
         $style->setFillColor(new \Zend_Pdf_Color_Rgb(0,0,0.85));
         $font = \Zend_Pdf_Font::fontWithName(\Zend_Pdf_Font::FONT_TIMES);
-        $style->setFont($font,20);
+        $style->setFont($font,$size);
         $this->currentPage->setStyle($style);
     }
 
-    private function setSubTitleStyle()
+    private function setSubTitleStyle($size = 12)
     {
         $style = new \Zend_Pdf_Style();
         // Blue color
-        $style->setLineColor(new \Zend_Pdf_Color_Rgb(0,0.15,0.85));
-        $style->setFillColor(new \Zend_Pdf_Color_Rgb(0,0.15,0.85));
+        $style->setLineColor(new \Zend_Pdf_Color_Rgb(0,0.45,0.85));
+        $style->setFillColor(new \Zend_Pdf_Color_Rgb(0,0.45,0.85));
         $font = \Zend_Pdf_Font::fontWithName(\Zend_Pdf_Font::FONT_TIMES);
-        $style->setFont($font,16);
+        $style->setFont($font,$size);
+        $this->currentPage->setStyle($style);
+    }
+
+    private function setErrorStyle($size = 11)
+    {
+        $style = new \Zend_Pdf_Style();
+        // Red color
+        $style->setLineColor(new \Zend_Pdf_Color_Rgb(0.85,0,0));
+        $style->setFillColor(new \Zend_Pdf_Color_Rgb(0.85,0,0));
+        $font = \Zend_Pdf_Font::fontWithName(\Zend_Pdf_Font::FONT_TIMES);
+        $style->setFont($font,$size);
+        $this->currentPage->setStyle($style);
+    }
+
+    private function setWarningStyle($size = 11)
+    {
+        $style = new \Zend_Pdf_Style();
+        // Orange color
+        $style->setLineColor(new \Zend_Pdf_Color_Rgb(0.85,0.45,0));
+        $style->setFillColor(new \Zend_Pdf_Color_Rgb(0.85,0.45,0));
+        $font = \Zend_Pdf_Font::fontWithName(\Zend_Pdf_Font::FONT_TIMES);
+        $style->setFont($font,$size);
         $this->currentPage->setStyle($style);
     }
 }

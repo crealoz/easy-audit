@@ -2,14 +2,12 @@
 
 namespace Crealoz\EasyAudit\Test\Unit\Service;
 
+use Crealoz\EasyAudit\Service\FileSystem\FileGetterFactory;
 use PHPUnit\Framework\TestCase;
 use Crealoz\EasyAudit\Service\Audit;
 use Psr\Log\LoggerInterface;
 use Magento\MediaStorage\Model\File\Storage\FileFactory;
 use Magento\Framework\Filesystem;
-use Crealoz\EasyAudit\Service\FileSystem\DiXmlGetter;
-use Crealoz\EasyAudit\Service\FileSystem\LayoutXmlGetter;
-use Crealoz\EasyAudit\Service\FileSystem\HelpersGetter;
 use Crealoz\EasyAudit\Service\PDFWriter;
 
 /**
@@ -22,10 +20,8 @@ class AuditTest extends TestCase
     private $logger;
     private $fileFactory;
     private $filesystem;
-    private $diXmlGetter;
-    private $layoutXmlGetter;
-    private $helpersGetter;
     private $pdfWriter;
+    private $fileGetterFactory;
 
     protected array $dummyResults = [
     'hasErrors' => true,
@@ -71,18 +67,14 @@ class AuditTest extends TestCase
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->fileFactory = $this->createMock(FileFactory::class);
         $this->filesystem = $this->createMock(Filesystem::class);
-        $this->diXmlGetter = $this->createMock(DiXmlGetter::class);
-        $this->layoutXmlGetter = $this->createMock(LayoutXmlGetter::class);
-        $this->helpersGetter = $this->createMock(HelpersGetter::class);
+        $this->fileGetterFactory = $this->createMock(FileGetterFactory::class);
         $this->pdfWriter = $this->createMock(PDFWriter::class);
 
         $this->audit = new Audit(
             $this->logger,
             $this->fileFactory,
             $this->filesystem,
-            $this->diXmlGetter,
-            $this->layoutXmlGetter,
-            $this->helpersGetter,
+            $this->fileGetterFactory,
             $this->pdfWriter,
             []
         );
