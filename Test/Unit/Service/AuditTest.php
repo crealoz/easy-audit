@@ -1,5 +1,7 @@
 <?php
 
+namespace Crealoz\EasyAudit\Test\Unit\Service;
+
 use PHPUnit\Framework\TestCase;
 use Crealoz\EasyAudit\Service\Audit;
 use Psr\Log\LoggerInterface;
