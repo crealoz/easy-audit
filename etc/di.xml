@@ -32,6 +32,9 @@
     <!-- Processors -->
     <type name="Crealoz\EasyAudit\Service\Audit">
         <arguments>
+            <argument name="diXmlGetter" xsi:type="object">Crealoz\EasyAudit\Service\FileSystem\DiXmlGetter</argument>
+            <argument name="layoutXmlGetter" xsi:type="object">Crealoz\EasyAudit\Service\FileSystem\LayoutXmlGetter</argument>
+            <argument name="helpersGetter" xsi:type="object">Crealoz\EasyAudit\Service\FileSystem\HelpersGetter</argument>
             <argument name="processors" xsi:type="array">
                 <item name="di" xsi:type="array">
                     <item name="plugins" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Di\Plugins</item>

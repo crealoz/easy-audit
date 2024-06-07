@@ -10,6 +10,7 @@ use Crealoz\EasyAudit\Exception\Processor\Plugins\SameModulePluginException;
 use Crealoz\EasyAudit\Service\Processor\AbstractProcessor;
 use Crealoz\EasyAudit\Service\Processor\Di\Plugins\AroundChecker;
 use Crealoz\EasyAudit\Service\Processor\ProcessorInterface;
+use Magento\Framework\App\Utility\Files;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
@@ -63,7 +64,8 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
     public function __construct(
         protected AroundChecker $aroundChecker,
         private readonly DirectoryList $directoryList,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly Files $filesUtility
     )
     {
 
@@ -171,24 +173,18 @@ class Plugins extends AbstractProcessor implements ProcessorInterface
      */
     private function checkPluginFile(string $pluggingClass): void
     {
-        $pluggingClassParts = explode('\\', $pluggingClass);
 
-        /**
-         * get file path in magento environment
-         */
-        $directoryPath = $this->directoryList->getPath('app');
-        $pluggingClassPath = $directoryPath.'/code/'.implode('/', $pluggingClassParts).'.php';
-        if (!file_exists($pluggingClassPath)) {
+        if (!$this->filesUtility->classFileExists($pluggingClass)) {
             throw new PluginFileDoesNotExistException(
-                __("Plugin file does not exist: $pluggingClassPath"),
-                $pluggingClassPath
+                __("Plugin file does not exist: $pluggingClass"),
+                $pluggingClass
             );
         }
         /**
          * Parse code for around plugins
          */
         try {
-            $this->aroundChecker->execute($pluggingClass, $pluggingClassPath);
+            $this->aroundChecker->execute($pluggingClass);
         } catch (FileSystemException|\ReflectionException $e) {
             $this->logger->error($e->getMessage());
         }
