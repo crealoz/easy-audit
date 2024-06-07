@@ -4,7 +4,7 @@ namespace Crealoz\EasyAudit\Service\Processor;
 
 use Crealoz\EasyAudit\Exception\Processor\GeneralAuditException;
 
-class AbstractProcessor
+abstract class AbstractProcessor
 {
     protected string $processorName = '';
 
@@ -21,6 +21,9 @@ class AbstractProcessor
         return $this->processorName;
     }
 
+    /**
+     * @throws GeneralAuditException
+     */
     public function getResults(): array
     {
         if (

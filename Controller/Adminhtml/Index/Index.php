@@ -3,6 +3,9 @@ namespace Crealoz\EasyAudit\Controller\Adminhtml\Index;
 
 use Magento\Framework\Controller\ResultFactory;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class Index extends \Magento\Backend\App\Action
 {
 

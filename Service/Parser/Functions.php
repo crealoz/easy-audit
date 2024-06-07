@@ -4,6 +4,9 @@ namespace Crealoz\EasyAudit\Service\Parser;
 
 use SplFileObject;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class Functions
 {
 

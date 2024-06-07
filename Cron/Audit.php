@@ -1,6 +1,9 @@
 <?php
 namespace Crealoz\EasyAudit\Cron;
 
+/**
+ * @author Christophe Ferreboeuf <christophe@crealoz.fr>
+ */
 class Audit
 {
     public function __construct(
