@@ -14,6 +14,8 @@ class Helpers extends AbstractProcessor implements ProcessorInterface
 {
     protected string $processorName = 'Helpers';
 
+    protected string $auditSection = 'PHP';
+
     protected array $results = [
         'hasErrors' => false,
         'errors' => [

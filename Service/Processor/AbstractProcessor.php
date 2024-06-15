@@ -4,11 +4,15 @@ namespace Crealoz\EasyAudit\Service\Processor;
 
 use Crealoz\EasyAudit\Exception\Processor\GeneralAuditException;
 
-abstract class AbstractProcessor
+abstract class AbstractProcessor implements ProcessorInterface
 {
     protected string $processorName = '';
 
     protected array $results = [];
+
+    protected string $auditSection = '';
+
+    abstract public function run($input): array;
 
     /**
      * @throws GeneralAuditException
@@ -34,5 +38,13 @@ abstract class AbstractProcessor
             throw new GeneralAuditException(__('Results are malformed for processor ' . $this->getProcessorName() . '. Please check the processor implementation.'));
         }
         return $this->results;
+    }
+
+    public function getAuditSection(): string
+    {
+        if ($this->auditSection === '') {
+            throw new GeneralAuditException(__('Audit section is not set'));
+        }
+        return $this->auditSection;
     }
 }

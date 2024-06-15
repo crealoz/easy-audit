@@ -12,6 +12,8 @@ class Cacheable extends AbstractProcessor implements ProcessorInterface
 {
     protected string $processorName = 'Cacheable';
 
+    protected string $auditSection = 'View';
+
     protected array $results = [
         'hasErrors' => false,
         'warnings' => [
