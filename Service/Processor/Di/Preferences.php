@@ -12,6 +12,8 @@ class Preferences extends AbstractProcessor implements ProcessorInterface
 {
     protected string $processorName = 'Preferences';
 
+    protected string $auditSection = 'di';
+
     private array $existingPreferences = [];
 
     protected array $results = [

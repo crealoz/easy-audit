@@ -33,17 +33,19 @@
     <type name="Crealoz\EasyAudit\Service\Audit">
         <arguments>
             <argument name="processors" xsi:type="array">
-                <item name="di" xsi:type="array">
-                    <item name="plugins" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Di\Plugins</item>
-                    <item name="preferences" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Di\Preferences</item>
-                </item>
-                <item name="view" xsi:type="array">
+                <item name="xml" xsi:type="array">
+                    <item name="di" xsi:type="array">
+                        <item name="plugins" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Di\Plugins</item>
+                        <item name="preferences" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Di\Preferences</item>
+                    </item>
                     <item name="layout" xsi:type="array">
                         <item name="cacheable" xsi:type="object">Crealoz\EasyAudit\Service\Processor\View\Cacheable</item>
                     </item>
                 </item>
-                <item name="code" xsi:type="array">
-                    <item name="helpers" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Code\Helpers</item>
+                <item name="php" xsi:type="array">
+                    <item name="helpers" xsi:type="array">
+                        <item name="general" xsi:type="object">Crealoz\EasyAudit\Service\Processor\Code\Helpers</item>
+                    </item>
                 </item>
             </argument>
         </arguments>
@@ -74,5 +76,13 @@
             <argument name="pattern" xsi:type="string">/^.+\/Helper\/.*\.php$/i</argument>
         </arguments>
     </virtualType>
-
+    <!-- End of Files getters -->
+    <type name="Crealoz\EasyAudit\Service\Type\TypeFactory">
+        <arguments>
+            <argument name="typeMapping" xsi:type="array">
+                <item name="php" xsi:type="string">Crealoz\EasyAudit\Service\Type\PHPCode</item>
+                <item name="xml" xsi:type="string">Crealoz\EasyAudit\Service\Type\Xml</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

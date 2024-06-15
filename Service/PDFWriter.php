@@ -25,6 +25,8 @@ class PDFWriter
     }
 
     /**
+     * Entry point for the PDF creation
+     *
      * @throws \Zend_Pdf_Exception
      * @throws FileSystemException
      */
@@ -32,12 +34,14 @@ class PDFWriter
     {
         $this->pdf = new \Zend_Pdf();
         $this->addPage();
-        foreach ($results as $section => $result) {
-            $this->writeTitle($section, 40);
-            foreach ($result as $subsection => $subresult) {
-                $this->writeSectionTitle($subsection);
-                if ($subresult['hasErrors']) {
-                    $this->manageSubResult($subresult);
+        foreach ($results as $type => $result) {
+            foreach ($result as $section => $sectionResults) {
+                $this->writeTitle($section, 40);
+                foreach ($sectionResults as $subsection => $subResults) {
+                    $this->writeSectionTitle($subsection);
+                    if ($subResults['hasErrors']) {
+                        $this->manageSubResult($subResults);
+                    }
                 }
             }
         }
@@ -49,12 +53,17 @@ class PDFWriter
         $this->pdf->save($fileName);
     }
 
-    private function manageSubResult($subresult): void
+    /**
+     * Manage the subresult of a section
+     *
+     * @param array $subResults
+     */
+    private function manageSubResult($subResults): void
     {
-        if (isset($subresult['errors'])){
+        if (isset($subResults['errors'])){
             $this->setErrorStyle(14);
             $this->currentPage->drawText('Errors', 44, $this->y);
-            foreach ($subresult['errors'] as $errorType => $errors) {
+            foreach ($subResults['errors'] as $errorType => $errors) {
                 if ($errorType === 'helpersInsteadOfViewModels') {
                     $this->manageHelperInsteadOfViewModel($errors);
                 } else {
@@ -62,11 +71,11 @@ class PDFWriter
                 }
             }
         }
-        if (!empty($subresult['warnings'])) {
+        if (!empty($subResults['warnings'])) {
             $this->y -= 15;
             $this->setWarningStyle(14);
             $this->currentPage->drawText('Warning', 44, $this->y);
-            foreach ($subresult['warnings'] as $warningType => $warnings) {
+            foreach ($subResults['warnings'] as $warningType => $warnings) {
                 $this->manageSubsection($warnings);
             }
         }
@@ -102,17 +111,21 @@ class PDFWriter
         }
         $this->writeSubSectionIntro($subresults);
         $this->writeLine('Files:');
-        foreach ($subresults['files'] as $file) {
-            if (is_array($file)) {
-                $file = implode(', ', $file);
+        foreach ($subresults['files'] as $key => $files) {
+            if (is_array($files)) {
+                $this->writeLine($key);
+                foreach ($files as $file) {
+                    $this->writeLine('-' . $file, 8, 0.2, 0.2, 0.2);
+                }
+            } else {
+                $this->writeLine('-' . $files);
             }
-            $this->writeLine('-' . $file);
         }
     }
 
-    private function writeLine($text): void
+    private function writeLine($text, $size = 9, $r = 0, $g = 0, $b = 0): void
     {
-        $this->setGeneralStyle();
+        $this->setGeneralStyle($size, $r, $g, $b);
         // If line is too long, we split it
         if (strlen($text) > 100) {
             $wrappedText = wordwrap($text, 100, "--SPLIT--");
@@ -177,11 +190,11 @@ class PDFWriter
         $this->y = 850 - 50;
     }
 
-    private function setGeneralStyle($size = 9)
+    private function setGeneralStyle($size = 9, $r = 0, $g = 0, $b = 0)
     {
         $style = new \Zend_Pdf_Style();
-        $style->setLineColor(new \Zend_Pdf_Color_Rgb(0,0,0));
-        $style->setFillColor(new \Zend_Pdf_Color_Rgb(0,0,0));
+        $style->setLineColor(new \Zend_Pdf_Color_Rgb($r,$g,$b));
+        $style->setFillColor(new \Zend_Pdf_Color_Rgb($r,$g,$b));
         $font = \Zend_Pdf_Font::fontWithName(\Zend_Pdf_Font::FONT_TIMES);
         $style->setFont($font,$size);
         $this->currentPage->setStyle($style);

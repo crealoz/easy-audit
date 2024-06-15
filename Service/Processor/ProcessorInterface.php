@@ -23,4 +23,6 @@ interface ProcessorInterface
      * @return array
      */
     public function getResults(): array;
+
+    public function getAuditSection(): string;
 }

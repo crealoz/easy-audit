@@ -12,7 +12,6 @@ use Crealoz\EasyAudit\Service\Processor\Di\Plugins\AroundChecker;
 use Crealoz\EasyAudit\Service\Processor\ProcessorInterface;
 use Magento\Framework\App\Utility\Files;
 use Magento\Framework\Exception\FileSystemException;
-use Magento\Framework\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -21,6 +20,8 @@ use Psr\Log\LoggerInterface;
 class Plugins extends AbstractProcessor implements ProcessorInterface
 {
     protected string $processorName = 'plugins';
+
+    protected string $auditSection = 'di';
 
     protected array $results = [
         'hasErrors' => false,
