@@ -42,6 +42,7 @@ class Helpers extends AbstractProcessor implements ProcessorInterface
                 'files' => []
             ],
         ],
+        'suggestions' => []
     ];
 
     private array $helpersInPhtmlFiles = [];

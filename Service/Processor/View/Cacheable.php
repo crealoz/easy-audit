@@ -16,6 +16,7 @@ class Cacheable extends AbstractProcessor implements ProcessorInterface
 
     protected array $results = [
         'hasErrors' => false,
+        'errors' => [],
         'warnings' => [
             'useCacheable' => [
                 'title' => 'Use of cacheable="false" in layout XML',
@@ -25,6 +26,7 @@ class Cacheable extends AbstractProcessor implements ProcessorInterface
                 'files' => []
             ]
         ],
+        'suggestions' => []
     ];
 
     protected array $allowedAreas = ['sales', 'customer', 'gift', 'message'];
