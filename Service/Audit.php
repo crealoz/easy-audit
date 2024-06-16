@@ -3,12 +3,10 @@
 namespace Crealoz\EasyAudit\Service;
 
 use Crealoz\EasyAudit\Service\FileSystem\FileGetterFactory;
-use Crealoz\EasyAudit\Service\Processor\ProcessorInterface;
 use Crealoz\EasyAudit\Service\Type\TypeFactory;
 use Magento\Framework\Filesystem;
 use Magento\MediaStorage\Model\File\Storage\FileFactory;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
