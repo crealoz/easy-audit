@@ -66,20 +66,12 @@ class AuditTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->logger = $this->createMock(LoggerInterface::class);
-        $this->fileFactory = $this->createMock(FileFactory::class);
-        $this->filesystem = $this->createMock(Filesystem::class);
-        $this->fileGetterFactory = $this->createMock(FileGetterFactory::class);
         $this->pdfWriter = $this->createMock(PDFWriter::class);
         $this->typeFactory = $this->createMock(TypeFactory::class);
 
         $processors = []; // Replace this with the actual array of processors if needed
 
         $this->audit = new Audit(
-            $this->logger,
-            $this->fileFactory,
-            $this->filesystem,
-            $this->fileGetterFactory,
             $this->pdfWriter,
             $this->typeFactory,
             $processors
