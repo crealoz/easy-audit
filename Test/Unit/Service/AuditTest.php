@@ -4,6 +4,7 @@ namespace Crealoz\EasyAudit\Test\Unit\Service;
 
 use Crealoz\EasyAudit\Service\FileSystem\FileGetterFactory;
 use Crealoz\EasyAudit\Service\Type\TypeFactory;
+use Crealoz\EasyAudit\Service\Type\TypeInterface;
 use PHPUnit\Framework\TestCase;
 use Crealoz\EasyAudit\Service\Audit;
 use Psr\Log\LoggerInterface;
@@ -18,11 +19,7 @@ use Crealoz\EasyAudit\Service\PDFWriter;
 class AuditTest extends TestCase
 {
     private Audit $audit;
-    private $logger;
-    private $fileFactory;
-    private $filesystem;
     private $pdfWriter;
-    private $fileGetterFactory;
     private TypeFactory $typeFactory;
 
     protected array $dummyResults = [
@@ -68,21 +65,35 @@ class AuditTest extends TestCase
     {
         $this->pdfWriter = $this->createMock(PDFWriter::class);
         $this->typeFactory = $this->createMock(TypeFactory::class);
+        $this->dummyResults = ['dummyType' => ['dummyResult']];
 
-        $processors = []; // Replace this with the actual array of processors if needed
+        $this->audit = new Audit($this->pdfWriter, $this->typeFactory, ['dummyType' => ['dummySubType']]);
+    }
 
-        $this->audit = new Audit(
-            $this->pdfWriter,
-            $this->typeFactory,
-            $processors
-        );
+    protected function tearDown(): void
+    {
+        unset($this->audit);
+        unset($this->pdfWriter);
+        unset($this->typeFactory);
+        unset($this->dummyResults);
     }
 
     public function testRun()
     {
+        $typeMock = $this->createMock(TypeInterface::class);
+        $typeMock->expects($this->once())
+            ->method('process')
+            ->with(['dummySubType'], 'dummyType')
+            ->willReturn($this->dummyResults['dummyType']);
+
+        $this->typeFactory->expects($this->once())
+            ->method('create')
+            ->with('dummyType')
+            ->willReturn($typeMock);
+
         $this->pdfWriter->expects($this->once())
             ->method('createdPDF')
-            ->with([]);
+            ->with($this->dummyResults);
 
         $this->audit->run();
     }
