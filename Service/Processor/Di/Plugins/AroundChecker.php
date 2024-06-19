@@ -14,7 +14,7 @@ class AroundChecker
 {
     public function __construct(
         protected readonly Functions $functionsParser,
-        protected readonly \Magento\Framework\Filesystem\DriverInterface $driver
+        protected readonly \Magento\Framework\Filesystem\Driver\File $driver
     )
     {
 

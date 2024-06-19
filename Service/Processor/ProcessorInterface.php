@@ -2,8 +2,6 @@
 
 namespace Crealoz\EasyAudit\Service\Processor;
 
-use Crealoz\EasyAudit\Exception\Processor\AuditProcessorException;
-
 /**
  * @author Christophe Ferreboeuf <christophe@crealoz.fr>
  */

@@ -27,6 +27,7 @@ class Preferences extends AbstractProcessor implements ProcessorInterface
             ],
         ],
         'warnings' => [],
+        'suggestions' => []
     ];
 
     public function run($input): array
