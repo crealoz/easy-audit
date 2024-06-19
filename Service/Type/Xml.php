@@ -5,7 +5,7 @@ namespace Crealoz\EasyAudit\Service\Type;
 use Crealoz\EasyAudit\Service\Processor\ProcessorInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-class Xml extends AbstractType
+class Xml extends AbstractType implements TypeInterface
 {
 
     protected function doProcess(array $processors, array $files, ProgressBar $progressBar = null): void

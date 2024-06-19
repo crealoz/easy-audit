@@ -2,14 +2,10 @@
 
 namespace Crealoz\EasyAudit\Test\Unit\Service;
 
-use Crealoz\EasyAudit\Service\FileSystem\FileGetterFactory;
 use Crealoz\EasyAudit\Service\Type\TypeFactory;
 use Crealoz\EasyAudit\Service\Type\TypeInterface;
 use PHPUnit\Framework\TestCase;
 use Crealoz\EasyAudit\Service\Audit;
-use Psr\Log\LoggerInterface;
-use Magento\MediaStorage\Model\File\Storage\FileFactory;
-use Magento\Framework\Filesystem;
 use Crealoz\EasyAudit\Service\PDFWriter;
 
 /**

@@ -5,7 +5,7 @@ namespace Crealoz\EasyAudit\Service\Type;
 use Crealoz\EasyAudit\Service\Processor\ProcessorInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-class PHPCode extends AbstractType
+class PHPCode extends AbstractType implements TypeInterface
 {
 
 
