@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Preferences-->
+        <preference for="Crealoz\EasyAudit\Api\Data\AuditInterface" type="Crealoz\EasyAudit\Model\Audit"/>
+        <preference for="Crealoz\EasyAudit\Api\Data\AuditRequestInterface" type="Crealoz\EasyAudit\Model\AuditRequest"/>
+        <preference for="Crealoz\EasyAudit\Api\AuditRepositoryInterface" type="Crealoz\EasyAudit\Model\AuditRepository"/>
+        <preference for="Crealoz\EasyAudit\Api\AuditRequestRepositoryInterface" type="Crealoz\EasyAudit\Model\AuditRequestRepository"/>
+     <!-- End of Preferences -->
     <!-- Command -->
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
@@ -85,4 +91,48 @@
             </argument>
         </arguments>
     </type>
+    <!-- change default preference of DriverInterface -->
+    <type name="Crealoz\EasyAudit\Service\Processor\Code\Helpers">
+        <arguments>
+            <argument name="driver" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Crealoz\EasyAudit\Service\Processor\Di\Plugins\AroundChecker">
+        <arguments>
+            <argument name="driver" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <!-- End of change default preference of DriverInterface -->
+
+    <!-- DataSource for the grid -->
+    <virtualType name="AuditGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Crealoz\EasyAudit\Model\ResourceModel\Audit\Collection</argument>
+            <argument name="filterPool" xsi:type="object" shared="false">AuditGridFilterPool</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="AuditGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="easyaudit_listing_data_source" xsi:type="string">Crealoz\EasyAudit\Model\ResourceModel\Audit\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="Crealoz\EasyAudit\Model\ResourceModel\Audit\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">crealoz_easyaudit</argument>
+            <argument name="resourceModel" xsi:type="string">Crealoz\EasyAudit\Model\ResourceModel\Audit</argument>
+        </arguments>
+    </virtualType>
 </config>
